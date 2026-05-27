@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FastAPI Example App
 
 Resources:
@@ -21,3 +22,6 @@ Resources:
 ```shell
 python -c 'import secrets; print(secrets.token_hex())'
 ```
+=======
+# Bank
+>>>>>>> ef841691637cfd9d0a4b950149822bbfa2623ec9
