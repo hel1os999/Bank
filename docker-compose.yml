@@ -1,0 +1,98 @@
+services:
+
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    environment:
+      APP_CONFIG__DB__USER_DATA_URL: postgresql+asyncpg://user:password@userdata_db:5432/userdata
+      APP_CONFIG__DB__BANK_URL: postgresql+asyncpg://manager:pwd@bank_db:5432/bank
+      APP_CONFIG__DB__ECHO: 0
+      APP_CONFIG__REDIS__HOST: redis
+    ports:
+        - "8000:8000"
+    depends_on:
+      bank_db:
+        condition: service_healthy
+      userdata_db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  bank_db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_DB: bank
+      POSTGRES_USER: manager
+      POSTGRES_PASSWORD: pwd
+    ports:
+      - "7777:5432"
+    volumes:
+      - bank_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  userdata_db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_DB: userdata
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+       - user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      bank_db:
+        condition: service_healthy
+      userdata_db:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:4.2-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"  # Web UI (http://localhost:15672)
+      - "5672:5672"    # AMQP Protocol
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: qwe
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+
+volumes:
+  bank_data:
+  user_data:
+  rabbitmq_data:
+  redis_data:
+  #pgadmin:
+    #image: dpage/pgadmin4
+    #environment:
+      #PGADMIN_DEFAULT_EMAIL: admin@admin.org
+      #PGADMIN_DEFAULT_PASSWORD: admin
+      #PGADMIN_CONFIG_SERVER_MODE: 'False'
+    #ports:
+      #- "5050:80"
+
