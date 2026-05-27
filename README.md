@@ -24,4 +24,32 @@ python -c 'import secrets; print(secrets.token_hex())'
 ```
 =======
 # Bank
->>>>>>> ef841691637cfd9d0a4b950149822bbfa2623ec9
+  ## About the Project
+This is a neobank (like Revolut). You can create users, set up bank accounts, issue cards, process transactions etc. The project itself is built on FastAPI. User management is implemented using FastAPI Users. Caching and a message broker have also been implemented.
+
+  ## Techology
+- FastAPI
+- fastapi-users
+- Pydantic
+- Alembic
+- SQLAlchemy
+- Docker & Docker compose
+- Redis
+- RabbitMQ
+- pytest
+
+  ## Run
+1. poetry install
+2. For APP_CONFIG__ACCESS_TOKEN__RESET_PASSWORD_TOKEN_SECRET= and APP_CONFIG__ACCESS_TOKEN__VERIFICATION_TOKEN_SECRET= run two times: 
+```shell
+python -c 'import secrets; print(secrets.token_hex())'
+```
+3. For APP_CONFIG__CRYPTOGRAPHY__DB_ENCRYPTION_KEY= run:
+```shell
+python -c "import secrets, base64; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())"
+```
+4. APP_CONFIG__CRYPTOGRAPHY__PASSPORT__HASH_SALT and APP_CONFIG__CRYPTOGRAPHY__CARD_HASH_SALT= you will have to come up with this yourself.
+5. Run: 
+```shell
+docker compose up -d --build       
+```

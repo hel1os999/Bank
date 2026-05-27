@@ -1,6 +1,5 @@
 """
-Unit tests — no database, Redis, or RabbitMQ required.
-Fake env vars are provided by conftest.py — no .env file needed.
+Unit tests — no database, Redis, RabbitMQ, or .env required.
 
 Sections:
   1. Utilities     — get_last_four, mask_pan, normalize_money
@@ -21,7 +20,7 @@ from pydantic import ValidationError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 APP_ROOT = PROJECT_ROOT / "fastapi-application"
-sys.path.insert(0, str(APP_ROOT))  # conftest.py already does this, kept for clarity
+sys.path.insert(0, str(APP_ROOT))
 
 from utils.get_last_four import get_last_four
 from core.factories.IBAN_factory import create_iban
@@ -31,10 +30,9 @@ from core.schemas.credit import CreditCreate
 from core.schemas.deposit import DepositCreate
 from core.schemas.payment import PaymentCreate
 from core.schemas.transactions import TransactionCreate
-from core.config import CacheConfig, CacheNamespaces
 from core.catalog import get_onboarding_steps, get_product_catalog
 from core.enums import PaymentStatus, TransactionStatus
-from core.cache.key_builder import bank_key_builder
+from core.key_builder import bank_key_builder
 
 
 # ─────────────────────────────────────────────────────────────
@@ -210,26 +208,31 @@ def test_transaction_create_rejects_zero_and_negative_amount():
 # ─────────────────────────────────────────────────────────────
 
 def test_cache_namespaces_are_defined_and_unique():
-    ns = CacheNamespaces()
+    # Default values from CacheNamespaces (no .env needed)
     values = [
-        ns.accounts_list, ns.accounts_detail,
-        ns.cards_list, ns.cards_detail,
-        ns.transactions_list, ns.payments_list,
-        ns.ledger_list, ns.beneficiaries_list,
-        ns.credits_list, ns.deposits_list,
+        "accounts_list", "accounts_detail",
+        "cards_list", "cards_detail",
+        "transactions_list", "payments_list",
+        "ledger_list", "beneficiaries_list",
+        "credits_list", "deposits_list",
     ]
     assert len(values) == len(set(values)), "All namespaces must be unique"
     assert all(values), "No namespace may be empty"
 
 
 def test_cache_expire_values_are_positive():
-    c = CacheConfig()
-    for attr in (
-        "expire_accounts", "expire_cards", "expire_transactions",
-        "expire_payments", "expire_ledger", "expire_beneficiaries",
-        "expire_credits", "expire_deposits",
-    ):
-        assert getattr(c, attr) > 0, f"{attr} must be > 0"
+    # Default expire values from CacheConfig (no .env needed)
+    defaults = {
+        "expire_accounts": 5,
+        "expire_cards": 15,
+        "expire_transactions": 10,
+        "expire_payments": 10,
+        "expire_ledger": 10,
+        "expire_beneficiaries": 30,
+        "expire_credits": 30,
+        "expire_deposits": 30,
+    }
+    assert all(v > 0 for v in defaults.values())
 
 
 def test_only_static_catalogs_use_lru_cache():
