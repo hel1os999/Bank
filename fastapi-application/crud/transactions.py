@@ -14,10 +14,7 @@ from crud.ledger import create_ledger_entry
 
 
 async def create_pending_card_transfer(
-    session: AsyncSession,
-    transaction: TransactionCreate,
-    sender_card_id: int,
-    user: User,
+    session: AsyncSession, transaction: TransactionCreate, user: User
 ):
     if transaction.idempotency_key is not None:
         existing = await session.execute(
@@ -33,7 +30,7 @@ async def create_pending_card_transfer(
     sender_stmt = (
         select(Card, Account)
         .join(Account)
-        .where(Card.id == sender_card_id, Account.user_id == user.id)
+        .where(Card.id == transaction.sender_card_id, Account.user_id == user.id)
         .with_for_update()
     )
     sender_result = await session.execute(sender_stmt)

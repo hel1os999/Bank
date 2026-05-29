@@ -112,7 +112,7 @@ class RabbitMQConfig(BaseModel):
     payments_routing_key: str = "payments"
     transactions_routing_key: str = "transactions"
     documents_routing_key: str | None = None
-    surveys_routing_key: str
+    surveys_routing_key: str = "surveys"
     rmq_url: str
 
 
