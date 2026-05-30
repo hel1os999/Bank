@@ -20,7 +20,6 @@ from utils.get_last_four import get_last_four
 async def create_card(
     card: CardCreate,
     account_id: int,
-    user_session: AsyncSession,
     bank_session: AsyncSession,
     user: User,
 ):
